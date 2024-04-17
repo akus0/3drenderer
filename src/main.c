@@ -20,6 +20,7 @@ bool initialize_window(void) {
     return false;
   }
 
+  // Creat a SDL Window
   window =
       SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                        window_width, window_height, SDL_WINDOW_BORDERLESS);
@@ -72,7 +73,7 @@ void render_color_buffer(void) {
 void clear_color_buffer(uint32_t color) {
   for (int y = 0; y < window_height; y++) {
     for (int x = 0; x < window_width; x++) {
-      color_buffer[(window_width * y)] = color;
+      color_buffer[(window_width * y) + x] = color;
     }
   }
 }
