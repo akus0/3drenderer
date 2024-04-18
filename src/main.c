@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-bool is_running = true;
+bool is_running = false;
 
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
@@ -20,6 +20,13 @@ bool initialize_window(void) {
     return false;
   }
 
+  // Use SDL to query what is the fullscreen max width and height
+  SDL_DisplayMode display_mode;
+  SDL_GetCurrentDisplayMode(0, &display_mode);
+
+  window_width = display_mode.w;
+  window_height = display_mode.h;
+
   // Creat a SDL Window
   window =
       SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -34,12 +41,17 @@ bool initialize_window(void) {
     fprintf(stderr, "Error creating renderer. \n");
     return false;
   }
+
+  SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+
   return true;
 }
 
 void setup(void) {
   // Allocate the required memory in bytes to hold the color buffer
-  color_buffer = malloc(sizeof(uint32_t) * window_width * window_height);
+
+  color_buffer =
+      (uint32_t *)malloc(sizeof(uint32_t) * window_width * window_height);
 
   // Creating a SDL texture that is used to display the color buffer
   color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
@@ -79,7 +91,7 @@ void clear_color_buffer(uint32_t color) {
 }
 
 void render(void) {
-  SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
 
   render_color_buffer();
