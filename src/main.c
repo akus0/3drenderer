@@ -27,7 +27,7 @@ bool initialize_window(void) {
   window_width = display_mode.w;
   window_height = display_mode.h;
 
-  // Creat a SDL Window
+  // Create a SDL Window
   window =
       SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                        window_width, window_height, SDL_WINDOW_BORDERLESS);
@@ -90,12 +90,35 @@ void clear_color_buffer(uint32_t color) {
   }
 }
 
+void draw_grid(void) {
+
+  for (int y = 0; y < window_height; y += 10) {
+    for (int x = 0; x < window_width; x += 10) {
+      // if (y % 10 == 0 || x % 10 == 0)
+      color_buffer[(window_width * y) + x] = 0xFF333333;
+    }
+  }
+}
+
+void draw_rect(int x, int y, int width, int height, uint32_t color) {
+
+  for (int i = 0; i < height; i++) {
+    for (int j = 0; j < width; j++) {
+      int current_x = x + i;
+      int current_y = y + j;
+      color_buffer[(window_width * current_y) + current_x] = 0xFF333333;
+    }
+  }
+}
+
 void render(void) {
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   SDL_RenderClear(renderer);
 
+  // draw_grid();
+  draw_rect(100, 200, 100, 700, 0xFF333333);
   render_color_buffer();
-  clear_color_buffer(0xFFFFFF00);
+  clear_color_buffer(0x00000000);
 
   SDL_RenderPresent(renderer);
 }
