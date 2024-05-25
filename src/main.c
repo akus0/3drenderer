@@ -36,7 +36,10 @@ void setup(void) {
   color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
                                            SDL_TEXTUREACCESS_STREAMING,
                                            window_width, window_height);
-  load_cube_mesh_data();
+
+  // Loads the cube values in the mesg data structure
+  // load_cube_mesh_data();
+  load_obj_file_data("./assets/f22.obj");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,7 +70,9 @@ vec2_t project(vec3_t point) {
   };
   return projected_point;
 }
-
+///////////////////////////////////////////////////////////////////////////////
+/// Update function frame by frame with a fixed time step
+///////////////////////////////////////////////////////////////////////////////
 void update(void) {
 
   // Wait some time until reach the tatget frame time in milliseconds
@@ -84,8 +89,8 @@ void update(void) {
   triangles_to_render = NULL;
 
   mesh.rotation.x += 0.01;
-  mesh.rotation.y += 0.01;
-  mesh.rotation.z += 0.01;
+  mesh.rotation.y += 0.00;
+  mesh.rotation.z += 0.00;
 
   // Loop all triangle faces of our mesh
   int num_faces = array_length(mesh.faces);
@@ -113,7 +118,7 @@ void update(void) {
       vec2_t projected_point = project(transformed_vertex);
 
       projected_point.x += (window_width / 2);
-      projected_point.y += (window_width / 2);
+      projected_point.y += (window_height / 2);
 
       projected_triangle.points[j] = projected_point;
     }
@@ -170,8 +175,6 @@ int main(void) {
   is_running = initialize_window();
 
   setup();
-
-  // vec3_t myvector = {2.0, 3.0, -4.0};
 
   while (is_running) {
     process_input();
