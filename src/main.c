@@ -116,7 +116,7 @@ void update(void) {
     face_vertices[1] = mesh.vertices[mesh_face.b - 1];
     face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
-    triangle_t projected_triangle;
+    // triangle_t projected_triangle;
 
     vec3_t transformed_vertices[3];
 
@@ -169,7 +169,9 @@ void update(void) {
     // Loop all three vertices to perform projection
     for (int j = 0; j < 3; j++) {
       // Project the current vertex
-      projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
+      // projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
+
+      projected_points[j] = project(transformed_vertices[j]);
 
       // Scale and translate the projected points to the middle of the screen
       projected_points[j].x += (window_width / 2);
@@ -214,6 +216,8 @@ void update(void) {
 /// Render function to draw ovjects on the display
 ///////////////////////////////////////////////////////////////////////////////
 void render(void) {
+  SDL_RenderClear(renderer);
+
   draw_grid();
 
   // Loop all projected triangles and render them
@@ -228,7 +232,7 @@ void render(void) {
           triangle.points[0].x, triangle.points[0].y, // vertex A
           triangle.points[1].x, triangle.points[1].y, // vertex B
           triangle.points[2].x, triangle.points[2].y, // vertex C
-          0xFF555555);
+          triangle.color);
     }
 
     // Draw triangle wireframe
@@ -251,13 +255,12 @@ void render(void) {
     }
   }
 
-  // draw_filled_triangle(300, 100, 50, 400, 500, 700, 0xFF00FF00);
-
   // Clear the array of triangles to render every frame loop
   array_free(triangles_to_render);
 
   render_color_buffer();
-  clear_color_buffer(0x00000000);
+
+  clear_color_buffer(0xFF000000);
 
   SDL_RenderPresent(renderer);
 }
