@@ -2,7 +2,7 @@
 #include <math.h>
 
 ///////////////////////////////////////////////////////////////////////////////
-// Implementations of Vector 2D functions
+// Implementations of Vector 2 functions
 ///////////////////////////////////////////////////////////////////////////////
 float vec2_length(vec2_t v) { return sqrt(v.x * v.x + v.y * v.y); }
 
@@ -35,7 +35,7 @@ void vec2_normalize(vec2_t *v) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Implementations of Vector 3D functions
+// Implementations of Vector 3 functions
 ///////////////////////////////////////////////////////////////////////////////
 float vec3_length(vec3_t v) { return sqrt(v.x * v.x + v.y * v.y + v.z * v.z); }
 
@@ -76,7 +76,6 @@ void vec3_normalize(vec3_t *v) {
   v->y /= length;
   v->z /= length;
 }
-
 vec3_t vec3_rotate_x(vec3_t v, float angle) {
   vec3_t rotated_vector = {.x = v.x,
                            .y = v.y * cos(angle) - v.z * sin(angle),
@@ -96,4 +95,17 @@ vec3_t vec3_rotate_z(vec3_t v, float angle) {
                            .y = v.x * sin(angle) + v.y * cos(angle),
                            .z = v.z};
   return rotated_vector;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Implementations of Vector conversion functions
+///////////////////////////////////////////////////////////////////////////////
+vec4_t vec4_from_vec3(vec3_t v) {
+  vec4_t result = {v.x, v.y, v.z, 1.0};
+  return result;
+}
+
+vec3_t vec3_from_vec4(vec4_t v) {
+  vec3_t result = {v.x, v.y, v.z};
+  return result;
 }
