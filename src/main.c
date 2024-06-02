@@ -134,18 +134,17 @@ void update(void) {
 
     vec4_t transformed_vertices[3];
 
-    // Loop all three vertices of this current face and apply all the
-    // transformations
+    // Loop all three vertices of this current face and apply transformations
     for (int j = 0; j < 3; j++) {
       vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
       // Use a matrix to scale our original vertex
       transformed_vertex = mat4_mul_vec4(scale_matrix, transformed_vertex);
+      transformed_vertex = mat4_mul_vec4(rotation_matrix_x, transformed_vertex);
+      transformed_vertex = mat4_mul_vec4(rotation_matrix_y, transformed_vertex);
+      transformed_vertex = mat4_mul_vec4(rotation_matrix_z, transformed_vertex);
       transformed_vertex =
           mat4_mul_vec4(translation_matrix, transformed_vertex);
-
-      // Translate the vertex away from the camera
-      transformed_vertex.z += 5;
 
       // Save transformed vertex in the array of transformed vertices
       transformed_vertices[j] = transformed_vertex;
