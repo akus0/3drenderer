@@ -133,7 +133,8 @@ void update(void) {
 
     vec4_t transformed_vertices[3];
 
-    // Loop all three vertices of this current face and apply transformations
+    // Loop all three vertices of this current face and apply all the
+    // transformations
     for (int j = 0; j < 3; j++) {
       vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
