@@ -24,6 +24,7 @@ float fov_factor = 640;
 
 bool is_running = false;
 int previous_frame_time = 0;
+mat4_t proj_matrix;
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Setup function to initiate variables and game objects
@@ -41,6 +42,13 @@ void setup(void) {
   color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
                                            SDL_TEXTUREACCESS_STREAMING,
                                            window_width, window_height);
+
+  // Initialize the perspective projection matrix
+  float fov = M_PI / 3.0; // the same as 180/3, or 60deg
+  float aspect = (float)window_height / (float)window_width;
+  float znear = 0.1;
+  float zfar = 100.0;
+  proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
   // Loads the cube values in the mesg data structure
   load_cube_mesh_data();
@@ -79,13 +87,6 @@ void process_input(void) {
 ///////////////////////////////////////////////////////////////////////////////
 /// Function that receives a 3D vector and returns a projected 2D point
 ///////////////////////////////////////////////////////////////////////////////
-vec2_t project(vec3_t point) {
-  vec2_t projected_point = {
-      .x = (fov_factor * point.x) / point.z,
-      .y = (fov_factor * point.y) / point.z,
-  };
-  return projected_point;
-}
 ///////////////////////////////////////////////////////////////////////////////
 /// Update function frame by frame with a fixed time step
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,16 +183,21 @@ void update(void) {
       }
     }
 
-    vec2_t projected_points[3];
+    vec4_t projected_points[3];
 
     // Loop all three vertices to perform projection
     for (int j = 0; j < 3; j++) {
       // Project the current vertex
-      projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
+      projected_points[j] =
+          mat4_mul_vec4_project(proj_matrix, transformed_vertices[j]);
 
-      // Scale and translate the projected points to the middle of the screen
-      projected_points[j].x += (window_width / 2);
-      projected_points[j].y += (window_height / 2);
+      // Scale into the view
+      projected_points[j].x *= (window_width / 2.0);
+      projected_points[j].y *= (window_height / 2.0);
+
+      // Translate the projected points to the middle of the screen
+      projected_points[j].x += (window_width / 2.0);
+      projected_points[j].y += (window_height / 2.0);
     }
 
     // Calculate the average depth for each face based on the vertices after
