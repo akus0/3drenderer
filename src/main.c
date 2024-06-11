@@ -51,8 +51,8 @@ void setup(void) {
   proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
   // Loads the cube values in the mesg data structure
-  load_cube_mesh_data();
-  // load_obj_file_data("./assets/cube.obj");
+  // load_cube_mesh_data();
+  load_obj_file_data("./assets/f22.obj");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
