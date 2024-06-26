@@ -3,6 +3,8 @@
 #include "light.h"
 #include "matrix.h"
 #include "mesh.h"
+#include "texture.h"
+#include "triangle.h"
 #include "vector.h"
 #include <SDL2/SDL.h>
 #include <stdbool.h>
@@ -31,7 +33,7 @@ mat4_t proj_matrix;
 ///////////////////////////////////////////////////////////////////////////////
 void setup(void) {
   // Initialize render mode and triangle culling method
-  render_method = RENDER_WIRE;
+  render_method = RENDER_TEXTURED_WIRE;
   cull_method = CULL_BACKFACE;
 
   // Allocate the required memory in bytes to hold the color buffer
@@ -50,11 +52,13 @@ void setup(void) {
   float zfar = 100.0;
   proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
-  // Loads the cube values in the mesg data structure
-  // load_cube_mesh_data();
-  load_obj_file_data("./assets/f22.obj");
-}
+  // Loads the vertex and face values for the mesh data structure
+  load_cube_mesh_data();
+  // load_obj_file_data("./assets/f22.obj");
 
+  // Load the hardcoded texture array in the global mesh texture variable
+  mesh_texture = (uint32_t *)REDBRICK_TEXTURE;
+}
 ///////////////////////////////////////////////////////////////////////////////
 /// Poll system events and handle keyboard input
 ///////////////////////////////////////////////////////////////////////////////
@@ -223,12 +227,12 @@ void update(void) {
         light_apply_intensity(mesh_face.color, light_intensity_factor);
 
     triangle_t projected_triangle = {
-        .points =
-            {
-                {projected_points[0].x, projected_points[0].y},
-                {projected_points[1].x, projected_points[1].y},
-                {projected_points[2].x, projected_points[2].y},
-            },
+        .points = {{projected_points[0].x, projected_points[0].y},
+                   {projected_points[1].x, projected_points[1].y},
+                   {projected_points[2].x, projected_points[2].y}},
+        .texcoords = {{mesh_face.a_uv.u, mesh_face.a_uv.v},
+                      {mesh_face.b_uv.u, mesh_face.b_uv.v},
+                      {mesh_face.c_uv.u, mesh_face.c_uv.v}},
         .color = triangle_color,
         .avg_depth = avg_depth};
 
