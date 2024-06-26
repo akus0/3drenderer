@@ -26,7 +26,7 @@ bool is_running = false;
 int previous_frame_time = 0;
 mat4_t proj_matrix;
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 /// Setup function to initiate variables and game objects
 ///////////////////////////////////////////////////////////////////////////////
 void setup(void) {
@@ -58,6 +58,7 @@ void setup(void) {
 ///////////////////////////////////////////////////////////////////////////////
 /// Poll system events and handle keyboard input
 ///////////////////////////////////////////////////////////////////////////////
+
 void process_input(void) {
   SDL_Event event;
   SDL_PollEvent(&event);
@@ -76,6 +77,10 @@ void process_input(void) {
       render_method = RENDER_FILL_TRIANGLE;
     if (event.key.keysym.sym == SDLK_4)
       render_method = RENDER_FILL_TRIANGLE_WIRE;
+    if (event.key.keysym.sym == SDLK_5)
+      render_method = RENDER_TEXTURED;
+    if (event.key.keysym.sym == SDLK_6)
+      render_method = RENDER_TEXTURED_WIRE;
     if (event.key.keysym.sym == SDLK_c)
       cull_method = CULL_BACKFACE;
     if (event.key.keysym.sym == SDLK_d)
@@ -267,9 +272,23 @@ void render(void) {
           triangle.color);
     }
 
+    // Draw textured triangle
+    if (render_method == RENDER_TEXTURED ||
+        render_method == RENDER_TEXTURED_WIRE) {
+      draw_textured_triangle(
+          triangle.points[0].x, triangle.points[0].y, triangle.texcoords[0].u,
+          triangle.texcoords[0].v, // vertex A
+          triangle.points[1].x, triangle.points[1].y, triangle.texcoords[1].u,
+          triangle.texcoords[1].v, // vertex B
+          triangle.points[2].x, triangle.points[2].y, triangle.texcoords[2].u,
+          triangle.texcoords[2].v, // vertex C
+          mesh_texture);
+    }
+
     // Draw triangle wireframe
     if (render_method == RENDER_WIRE || render_method == RENDER_WIRE_VERTEX ||
-        render_method == RENDER_FILL_TRIANGLE_WIRE) {
+        render_method == RENDER_FILL_TRIANGLE_WIRE ||
+        render_method == RENDER_TEXTURED_WIRE) {
       draw_triangle(triangle.points[0].x, triangle.points[0].y, // vertex A
                     triangle.points[1].x, triangle.points[1].y, // vertex B
                     triangle.points[2].x, triangle.points[2].y, // vertex C
