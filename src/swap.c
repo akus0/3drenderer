@@ -1,4 +1,3 @@
-
 #include "swap.h"
 
 void int_swap(int *a, int *b) {
