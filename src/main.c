@@ -12,24 +12,21 @@
 #include <stdio.h>
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Array of triangles that should be rendered framer by frame
+// Array of triangles that should be rendered frame by frame
 ///////////////////////////////////////////////////////////////////////////////
 triangle_t *triangles_to_render = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Global vriables for execution status and game loop
+// Global variables for execution status and game loop
 ///////////////////////////////////////////////////////////////////////////////
-vec3_t camera_position = {0, 0, 0};
-// vec3_t mesh.rotation = {.x = 0, .y = 0, .z = 0};
-
-float fov_factor = 640;
-
 bool is_running = false;
 int previous_frame_time = 0;
+
+vec3_t camera_position = {0, 0, 0};
 mat4_t proj_matrix;
 
-//////////////////////////////////////////////////////////////////////////////
-/// Setup function to initiate variables and game objects
+///////////////////////////////////////////////////////////////////////////////
+// Setup function to initialize variables and game objects
 ///////////////////////////////////////////////////////////////////////////////
 void setup(void) {
   // Initialize render mode and triangle culling method
@@ -59,10 +56,10 @@ void setup(void) {
   // Load the hardcoded texture array in the global mesh texture variable
   mesh_texture = (uint32_t *)REDBRICK_TEXTURE;
 }
-///////////////////////////////////////////////////////////////////////////////
-/// Poll system events and handle keyboard input
-///////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
+// Poll system events and handle keyboard input
+///////////////////////////////////////////////////////////////////////////////
 void process_input(void) {
   SDL_Event event;
   SDL_PollEvent(&event);
@@ -94,7 +91,7 @@ void process_input(void) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Update function frame by frame with a fixed time step
+// Update function frame by frame with a fixed time step
 ///////////////////////////////////////////////////////////////////////////////
 void update(void) {
   // Wait some time until the reach the target frame time in milliseconds
@@ -111,9 +108,9 @@ void update(void) {
   triangles_to_render = NULL;
 
   // Change the mesh scale, rotation, and translation values per animation frame
-  mesh.rotation.x += 0.005;
-  // mesh.rotation.y += 0.003;
-  // mesh.rotation.z += 0.004;
+  mesh.rotation.x += 0.002;
+  mesh.rotation.y += 0.002;
+  mesh.rotation.z += 0.002;
   mesh.translation.z = 5.0;
 
   // Create scale, rotation, and translation matrices that will be used to
@@ -218,8 +215,8 @@ void update(void) {
                        transformed_vertices[2].z) /
                       3.0;
 
-    // Calculate the shade intensity based on how aliged is the face normal and
-    // the opposite of the light direction
+    // Calculate the shade intensity based on how aliged is the normal with the
+    // flipped light direction ray
     float light_intensity_factor = -vec3_dot(normal, light.direction);
 
     // Calculate the triangle color based on the light angle
@@ -253,8 +250,9 @@ void update(void) {
     }
   }
 }
+
 ///////////////////////////////////////////////////////////////////////////////
-/// Render function to draw objects on the display
+// Render function to draw objects on the display
 ///////////////////////////////////////////////////////////////////////////////
 void render(void) {
   SDL_RenderClear(renderer);
@@ -302,11 +300,11 @@ void render(void) {
     // Draw triangle vertex points
     if (render_method == RENDER_WIRE_VERTEX) {
       draw_rect(triangle.points[0].x - 3, triangle.points[0].y - 3, 6, 6,
-                0xFFFF0000); // vertex A
+                0xFF0000FF); // vertex A
       draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6,
-                0xFFFF0000); // vertex B
+                0xFF0000FF); // vertex B
       draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6,
-                0xFFFF0000); // vertex C
+                0xFF0000FF); // vertex C
     }
   }
 
@@ -321,16 +319,16 @@ void render(void) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Free the memory that was dynamically allocated by the program
+// Free the memory that was dynamically allocated by the program
 ///////////////////////////////////////////////////////////////////////////////
 void free_resources(void) {
+  free(color_buffer);
   array_free(mesh.faces);
   array_free(mesh.vertices);
-  free(color_buffer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Main function
+// Main function
 ///////////////////////////////////////////////////////////////////////////////
 int main(void) {
   is_running = initialize_window();
