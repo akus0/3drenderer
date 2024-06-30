@@ -52,10 +52,10 @@ void setup(void) {
 
   // Loads the vertex and face values for the mesh data structure
   // load_cube_mesh_data();
-  load_obj_file_data("./assets/cube.obj");
+  load_obj_file_data("./assets/f22.obj");
 
   // Load the texture information from an external PNG file
-  load_png_texture_data("./assets/cube.png");
+  load_png_texture_data("./assets/f22.png");
 
   // Load the hardcoded texture array in the global mesh texture variable
   // mesh_texture = (uint32_t *)REDBRICK_TEXTURE;
@@ -112,9 +112,9 @@ void update(void) {
   triangles_to_render = NULL;
 
   // Change the mesh scale, rotation, and translation values per animation frame
-  mesh.rotation.x += 0.002;
-  mesh.rotation.y += 0.002;
-  mesh.rotation.z += 0.002;
+  mesh.rotation.x += -0.003;
+  mesh.rotation.y += 0.000;
+  mesh.rotation.z += 0.000;
   mesh.translation.z = 5.0;
 
   // Create scale, rotation, and translation matrices that will be used to
@@ -336,7 +336,7 @@ void render(void) {
 ///////////////////////////////////////////////////////////////////////////////
 void free_resources(void) {
   free(color_buffer);
-  upnbg_free(png_texture);
+  upng_free(png_texture);
   array_free(mesh.faces);
   array_free(mesh.vertices);
 }
