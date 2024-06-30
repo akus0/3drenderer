@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "texture.h"
 #include "triangle.h"
+#include "upng.h"
 #include "vector.h"
 #include <SDL2/SDL.h>
 #include <stdbool.h>
@@ -38,7 +39,7 @@ void setup(void) {
       (uint32_t *)malloc(sizeof(uint32_t) * window_width * window_height);
 
   // Creating a SDL texture that is used to display the color buffer
-  color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+  color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
                                            SDL_TEXTUREACCESS_STREAMING,
                                            window_width, window_height);
 
@@ -50,11 +51,14 @@ void setup(void) {
   proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
   // Loads the vertex and face values for the mesh data structure
-  load_cube_mesh_data();
-  // load_obj_file_data("./assets/f22.obj");
+  // load_cube_mesh_data();
+  load_obj_file_data("./assets/cube.obj");
+
+  // Load the texture information from an external PNG file
+  load_png_texture_data("./assets/cube.png");
 
   // Load the hardcoded texture array in the global mesh texture variable
-  mesh_texture = (uint32_t *)REDBRICK_TEXTURE;
+  // mesh_texture = (uint32_t *)REDBRICK_TEXTURE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -332,6 +336,7 @@ void render(void) {
 ///////////////////////////////////////////////////////////////////////////////
 void free_resources(void) {
   free(color_buffer);
+  upnbg_free(png_texture);
   array_free(mesh.faces);
   array_free(mesh.vertices);
 }
