@@ -138,9 +138,9 @@ void update(void) {
   num_triangles_to_render = 0;
 
   // Change the mesh scale, rotation, and translation values per animation frame
-  mesh.rotation.x += 0.0 * delta_time;
-  mesh.rotation.y += 0.0 * delta_time;
-  mesh.rotation.z += 0.0 * delta_time;
+  mesh.rotation.x += 0.006;
+  mesh.rotation.y += 0.000;
+  mesh.rotation.z += 0.000;
   mesh.translation.z = 5.0;
 
   // Initialize the target looking at the positive z-axis
