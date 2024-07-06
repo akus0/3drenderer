@@ -1,4 +1,5 @@
 #include "array.h"
+#include "camera.h"
 #include "display.h"
 #include "light.h"
 #include "matrix.h"
@@ -17,7 +18,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 bool is_running = false;
 int previous_frame_time = 0;
-vec3_t camera_position = {0, 0, 0};
+float delta_time = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Array to store triangles that should be rendered each frame
@@ -31,16 +32,18 @@ int num_triangles_to_render = 0;
 ///////////////////////////////////////////////////////////////////////////////
 mat4_t world_matrix;
 mat4_t proj_matrix;
+mat4_t view_matrix;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Setup function to initialize variables and game objects
 ///////////////////////////////////////////////////////////////////////////////
 void setup(void) {
   // Initialize render mode and triangle culling method
-  render_method = RENDER_TEXTURED_WIRE;
+  render_method = RENDER_TEXTURED;
   cull_method = CULL_BACKFACE;
 
-  // Allocate the required memory in bytes to hold the color buffer and z buffer
+  // Allocate the required memory in bytes to hold the color buffer and the
+  // z-buffer
   color_buffer =
       (uint32_t *)malloc(sizeof(uint32_t) * window_width * window_height);
   z_buffer = (float *)malloc(sizeof(float) * window_width * window_height);
@@ -51,21 +54,17 @@ void setup(void) {
                                            window_width, window_height);
 
   // Initialize the perspective projection matrix
-  float fov = M_PI / 3.0; // the same as 180/3, or 60deg
+  float fov = 3.141592 / 3.0; // the same as 180/3, or 60deg
   float aspect = (float)window_height / (float)window_width;
-  float znear = 0.1;
-  float zfar = 100.0;
+  float znear = 1.0;
+  float zfar = 20.0;
   proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
   // Loads the vertex and face values for the mesh data structure
-  // load_cube_mesh_data();
-  load_obj_file_data("./assets/f117.obj");
+  load_obj_file_data("./assets/efa.obj");
 
   // Load the texture information from an external PNG file
-  load_png_texture_data("./assets/f117.png");
-
-  // Load the hardcoded texture array in the global mesh texture variable
-  // mesh_texture = (uint32_t *)REDBRICK_TEXTURE;
+  load_png_texture_data("./assets/efa.png");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -95,11 +94,28 @@ void process_input(void) {
       render_method = RENDER_TEXTURED_WIRE;
     if (event.key.keysym.sym == SDLK_c)
       cull_method = CULL_BACKFACE;
-    if (event.key.keysym.sym == SDLK_d)
+    if (event.key.keysym.sym == SDLK_x)
       cull_method = CULL_NONE;
+    if (event.key.keysym.sym == SDLK_UP)
+      camera.position.y += 3.0 * delta_time;
+    if (event.key.keysym.sym == SDLK_DOWN)
+      camera.position.y -= 3.0 * delta_time;
+    if (event.key.keysym.sym == SDLK_a)
+      camera.yaw -= 1.0 * delta_time;
+    if (event.key.keysym.sym == SDLK_d)
+      camera.yaw += 1.0 * delta_time;
+    if (event.key.keysym.sym == SDLK_w) {
+      camera.forward_velocity = vec3_mul(camera.direction, 5.0 * delta_time);
+      camera.position = vec3_add(camera.position, camera.forward_velocity);
+    }
+    if (event.key.keysym.sym == SDLK_s) {
+      camera.forward_velocity = vec3_mul(camera.direction, 5.0 * delta_time);
+      camera.position = vec3_sub(camera.position, camera.forward_velocity);
+    }
     break;
   }
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 // Update function frame by frame with a fixed time step
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,16 +128,33 @@ void update(void) {
     SDL_Delay(time_to_wait);
   }
 
+  // Get a delta time factor converted to seconds to be used to update our game
+  // objects
+  delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0;
+
   previous_frame_time = SDL_GetTicks();
 
   // Initialize the counter of triangles to render for the current frame
   num_triangles_to_render = 0;
 
   // Change the mesh scale, rotation, and translation values per animation frame
-  mesh.rotation.x += 0.006;
-  mesh.rotation.y += 0.000;
-  mesh.rotation.z += 0.000;
-  mesh.translation.z = 4.0;
+  mesh.rotation.x += 0.0 * delta_time;
+  mesh.rotation.y += 0.0 * delta_time;
+  mesh.rotation.z += 0.0 * delta_time;
+  mesh.translation.z = 5.0;
+
+  // Initialize the target looking at the positive z-axis
+  vec3_t target = {0, 0, 1};
+  mat4_t camera_yaw_rotation = mat4_make_rotation_y(camera.yaw);
+  camera.direction = vec3_from_vec4(
+      mat4_mul_vec4(camera_yaw_rotation, vec4_from_vec3(target)));
+
+  // Offset the camera position in the direction where the camera is pointing at
+  target = vec3_add(camera.position, camera.direction);
+  vec3_t up_direction = {0, 1, 0};
+
+  // Create the view matrix
+  view_matrix = mat4_look_at(camera.position, target, up_direction);
 
   // Create scale, rotation, and translation matrices that will be used to
   // multiply the mesh vertices
@@ -163,6 +196,10 @@ void update(void) {
       // Multiply the world matrix by the original vector
       transformed_vertex = mat4_mul_vec4(world_matrix, transformed_vertex);
 
+      // Multiply the view matrix by the vector to transform the scene to camera
+      // space
+      transformed_vertex = mat4_mul_vec4(view_matrix, transformed_vertex);
+
       // Save transformed vertex in the array of transformed vertices
       transformed_vertices[j] = transformed_vertex;
     }
@@ -183,7 +220,8 @@ void update(void) {
     vec3_normalize(&normal);
 
     // Find the vector between vertex A in the triangle and the camera origin
-    vec3_t camera_ray = vec3_sub(camera_position, vector_a);
+    vec3_t origin = {0, 0, 0};
+    vec3_t camera_ray = vec3_sub(origin, vector_a);
 
     // Calculate how aligned the camera ray is with the face normal (using dot
     // product)
@@ -203,9 +241,15 @@ void update(void) {
     // Loop all three vertices to perform projection and conversion to screen
     // space
     for (int j = 0; j < 3; j++) {
-      // Project the current vertex
-      projected_points[j] =
-          mat4_mul_vec4_project(proj_matrix, transformed_vertices[j]);
+      // Project the current vertex using a perspective projection matrix
+      projected_points[j] = mat4_mul_vec4(proj_matrix, transformed_vertices[j]);
+
+      // Perform perspective divide
+      if (projected_points[j].w != 0) {
+        projected_points[j].x /= projected_points[j].w;
+        projected_points[j].y /= projected_points[j].w;
+        projected_points[j].z /= projected_points[j].w;
+      }
 
       // Flip vertically since the y values of the 3D mesh grow bottom->up and
       // in screen space y values grow top->down
@@ -250,6 +294,7 @@ void update(void) {
     }
   }
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 // Render function to draw objects on the display
 ///////////////////////////////////////////////////////////////////////////////
